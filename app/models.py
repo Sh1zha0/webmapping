@@ -2,40 +2,14 @@
 from django.utils import timezone
 from django.contrib.gis.geos import Point
 
-# Create your models here.
-
 from django.contrib.gis.db import models
 from django.contrib.gis import geos
 from django.contrib.auth.models import AbstractUser
 
-
-# class Place(models.Model):
-#
-#     class Meta:
-#         verbose_name = "place"
-#         verbose_name_plural = "places"
-#
-#     placename = models.CharField(
-#         verbose_name="place name",
-#         max_length=50,
-#         blank=True
-#     )
-#     location = models.PointField(
-#         verbose_name="location",
-#         blank=True,
-#         null=True
-#     )
-#     created = models.DateTimeField(
-#         auto_now_add=True
-#     )
-#     modified = models.DateTimeField(
-#         auto_now=True
-#     )
-#
-#     objects = models.GeoManager()
-#
-#     def __str__(self):
-#         return "{}, ({}), cr={}, mod={}".format(self.placename, self.location, self.created, self.modified)
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 
 class User(AbstractUser):
@@ -51,14 +25,14 @@ class User(AbstractUser):
         auto_now=True
     )
 
-    # objects = models.Manager()
+    objects = models.GeoManager()
 
     def __str__(self):
-        return "{}, ({}), last seen at {} ... cr={}, mod={}".format(self.username, self.get_full_name(), self.last_location, self.created, self.modified)
+        return "{}, ({}), last seen at {} ... cr={}, mod={}" \
+            .format(self.username, self.get_full_name(), self.last_location, self.created, self.modified)
 
 
 class FriendGroup(models.Model):
-
     class Meta:
         verbose_name = "firends list"
         verbose_name_plural = "friends lists"
@@ -92,7 +66,6 @@ class FriendGroup(models.Model):
 
 
 class UserFriendGroup(models.Model):
-
     class Meta:
         unique_together = ['member', 'friend_group']
         verbose_name = "friend group members"
@@ -119,3 +92,9 @@ class UserFriendGroup(models.Model):
 
     def __str__(self):
         return "{} is a member of {}".format(self.member, self.friend_group)
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
