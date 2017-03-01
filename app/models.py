@@ -25,7 +25,7 @@ class User(AbstractUser):
         auto_now=True
     )
 
-    objects = models.GeoManager()
+    # objects = models.GeoManager()
 
     def __str__(self):
         return "{}, ({}), last seen at {} ... cr={}, mod={}" \

@@ -20,19 +20,6 @@ class UserMeSerializer(geo_serializers.GeoFeatureModelSerializer):
     def get_url(self, obj):
         return self.context["request"].build_absolute_uri(reverse("rest:user-username", kwargs={"uid": obj.pk}))
 
-    def validate(self, data):
-        if (not self.context["request"].GET["lat"]) or (not self.context["request"].GET["lon"]):
-            raise serializers.ValidationError("Missing Coordinate(s)")
-        try:
-            lat = float(self.context["request"].GET["lat"])
-            lon = float(self.context["request"].GET["lon"])
-        except Exception:
-            raise serializers.ValidationError("Invalid coordinate(s) format")
-        if (not (-90.0 <= lat <= 90.0)) or (not (-180.0 <= lon <= 180.0)):
-            raise serializers.ValidationError("Coordinate(s) out of range")
-        data["new_location"] = Point(lon, lat)
-        return data
-
 
 class UserOtherSerializer(geo_serializers.GeoFeatureModelSerializer):
     url = serializers.SerializerMethodField()
