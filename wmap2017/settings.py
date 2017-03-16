@@ -44,11 +44,13 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'app',
     'leaflet',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -81,13 +83,14 @@ WSGI_APPLICATION = 'wmap2017.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
+# ask me for the details in class
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'wmapdb',
-        'USER': 'wmap',
-        'PASSWORD': 'markfoley',
-        'HOST': 'wmap2017.cqoqcqsrqcb1.eu-west-1.rds.amazonaws.com',
+        'NAME': '***************',
+        'USER': '***************',
+        'PASSWORD': '****************',
+        'HOST': '************************',
         'PORT': '5432',
     }
 }
@@ -145,3 +148,5 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
