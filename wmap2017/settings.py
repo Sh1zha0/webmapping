@@ -83,14 +83,13 @@ WSGI_APPLICATION = 'wmap2017.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-# ask me for the details in class
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'mydb',
+        'NAME': 'webm',
         'USER': 'postgres',
         'PASSWORD': '1996310',
-        'HOST': 'localhost',
+        'HOST': '46.101.5.171',
         'PORT': '5432',
     }
 }
