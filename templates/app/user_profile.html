@@ -1,0 +1,183 @@
+{% extends "app/base.html" %}
+
+{% load staticfiles %}
+{% load leaflet_tags %}
+
+{% block content %}
+    <h3>User Profile</h3>
+
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <p><span class="error">
+                    <strong>{{ error|escape }}</strong>
+                </span></p>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <p><span class="error">
+                <strong>{{ error|escape }}</strong>
+            </span></p>
+        {% endfor %}
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'app:userprofile' %}">
+            {% csrf_token %}
+            <table style="padding: 10px; width: 100%">
+                <tr>
+                    <td style="text-align: right; font-family: sans-serif, Arial; font-style: italic; font-weight: normal">
+                        Username
+                    </td>
+                    <td style="font-family: sans-serif, Arial; font-style: italic; font-weight: bold">{{ object.username }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; font-family: sans-serif, Arial; font-style: italic; font-weight: normal">
+                        Last login
+                    </td>
+                    <td style="font-family: sans-serif, Arial; font-style: italic; font-weight: bold">{{ object.last_login }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">{{ form.first_name.label_tag }}</td>
+                    <td>{{ form.first_name }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">{{ form.last_name.label_tag }}</td>
+                    <td>{{ form.last_name }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">{{ form.email.label_tag }}</td>
+                    <td>{{ form.email }}</td>
+                </tr>
+{#                <tr>#}
+{#                    <td style="text-align: right;">{{ form.location.label_tag }}</td>#}
+{#                    <td>{{ form.email }}</td>#}
+{#                </tr>#}
+                <tr>
+                    <td style="text-align: right;"></td>
+                    <td><input type="submit" value="Update Profile"/></td>
+                </tr>
+                {#                {{ form.as_table }}#}
+            </table>
+{#            <input type="submit" value="Update Profile"/>#}
+
+        </form>
+    {% else %}
+        <p class="error">You are not logged in.</p>
+    {% endif %}
+
+    <p id="geom" style="visibility: hidden; display: none">{{ object.last_location.geojson }}</p>
+
+    <script type="text/javascript" src="/static/app/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="/static/app/js/ajaxHandling.js"></script>
+    <script>
+    var myLatLon, lat, long, geojson;
+        function map_init(map, options) {
+            //var geom = JSON.parse($("#geom").html());
+{#            var myLatLon = L.latLng([geom.coordinates[1], geom.coordinates[0]]);#}
+{##}
+{#            geom = L.geoJson(geom);#}
+{#            geom.addTo(map);#}
+{##}
+{#            map.setView(myLatLon, 16);#}
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+
+            function showPosition(position) {
+
+                var myStyle = {
+                    "color": "#ff7800",
+                    "weight": 5,
+                    "opacity": 0.65
+                };
+
+                var myP = [{
+                    "type": "Point",
+                    "coordinates": [position.coords.latitude, position.coords.longitude]
+                }];
+
+                lat = position.coords.latitude;
+                long = position.coords.longitude;
+
+                userEmail = $("#id_email").val();
+                console.log(userEmail)
+
+                console.log(lat);
+
+                myLatLon = L.latLng(lat, long);
+                map.setView(myLatLon, 16);
+
+                L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+
+
+                L.marker(myLatLon).addTo(map)
+                    .bindPopup('you are here')
+                    .openPopup();
+
+                var myLines = [{
+                    "type": "LineString",
+                    "coordinates": [[lat, long], [lat + 10, long + 10], [lat + 12, long + 12]]
+                }, {
+                    "type": "LineString",
+                    "coordinates": [[lat, long], [lat + 10, long + 10], [lat + 12, long + 12]]
+                }];
+            }
+
+        }
+
+
+    </script>
+
+    <h3>Last known location</h3>
+    <div style="text-align: center">
+        {% leaflet_map "my_map" callback="map_init" %}
+        <input type = "button" id = "updateLastlocation" value = "update Last location"/>
+    </div>
+    {% block javascript %}
+        {% csrf_token %}
+        <script>
+        $("#updateLastlocation").click(function(){
+            console.log(lat);
+            geojson = { "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [lat, long]}};
+
+            $.ajax({
+                type:'POST',
+                url:'/ajax/updatelocation/',
+                data: geojson,
+                datatype:'json',
+                success: function(data){
+                    console.log('yas'+data);
+                }
+            });
+        });
+        </script>
+    {% endblock %}
+    <div>
+{#         <form method="post" action="{% url 'app:updateInfo' %}">#}
+{#                {% csrf_token %}#}
+{#                <table>#}
+{#                    <tr>#}
+{#                        <td>{{ form.lat.label_tag }}</td>#}
+{#                        <td>{{ form.lat }}</td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>{{ form.long.label_tag }}</td>#}
+{#                        <td>{{ form.long }}</td>#}
+{#                    </tr>#}
+{#                    {{ form.as_table }}#}
+{#                </table>#}
+{#                <input type="submit" value="Update Location"/>#}
+{#        </form>#}
+    </div>
+
+
+{% endblock %}
+
