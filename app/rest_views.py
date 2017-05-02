@@ -113,3 +113,31 @@ def token_login(request):
             return Response({"detail": "Inactive account"}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({"detail": "Invalid User Id of Password"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class displayFriend(generics.ListAPIView):
+#     permission_classes = (permissions.IsAuthenticated,)
+#     def get_object(self):
+#         if "uid" in self.kwargs and self.kwargs["uid"]:
+#             users = get_user_model().objects.filter(id=self.kwargs["uid"])
+#         elif "email" in self.kwargs and self.kwargs["email"]:
+#             users = get_user_model().objects.filter(email=self.kwargs["email"])
+#         else:
+#             users = None
+#         if not users:
+#             self.other = None
+#             raise exceptions.NotFound
+#         self.other = users[0]
+#         return self.other
+#
+#     def get_serializer_class(self):
+#         if self.request.user == self.other:
+#             return serializers.UserMeSerializer
+#         else:
+#             return serializers.UserOtherSerializer
+
+# @api_view(["GET", ])
+# def listFriend(request):
+#     print(request.data)
+#     idd = request.user.pk
+#     return Response(idd, status=status.HTTP_200_OK)

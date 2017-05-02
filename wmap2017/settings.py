@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'webm',
         'USER': 'postgres',
         'PASSWORD': '1996310',
-        'HOST': '46.101.5.171',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }

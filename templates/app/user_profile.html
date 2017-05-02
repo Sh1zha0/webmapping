@@ -71,7 +71,21 @@
     <script type="text/javascript" src="/static/app/js/jquery-1.8.3.min.js"></script>
     <script type="text/javascript" src="/static/app/js/ajaxHandling.js"></script>
     <script>
-    var myLatLon, lat, long, geojson;
+
+
+
+    </script>
+
+    <h3>Last known location</h3>
+    <div style="text-align: center">
+        {% leaflet_map "my_map" callback="map_init" %}
+        <input type = "button" id = "updateLastlocation" value = "update Last location"/>
+        <input type = "button" id = "getFriend" value = "Print Friends"/>
+    </div>
+    {% block javascript %}
+        {% csrf_token %}
+        <script>
+        var myLatLon, lat, long, data;
         function map_init(map, options) {
             //var geom = JSON.parse($("#geom").html());
 {#            var myLatLon = L.latLng([geom.coordinates[1], geom.coordinates[0]]);#}
@@ -86,6 +100,7 @@
             } else {
                 x.innerHTML = "Geolocation is not supported by this browser.";
             }
+
 
             function showPosition(position) {
 
@@ -121,6 +136,16 @@
                     .bindPopup('you are here')
                     .openPopup();
 
+                if(data != null){
+                    for(var i = 0; i < data.length; i++){
+                        myLatLon = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);
+                        console.log(painting);
+                        L.marker(myLatLon).addTo(map)
+                        .bindPopup(data.properties.username)
+                        .openPopup();
+                     }
+                }
+
                 var myLines = [{
                     "type": "LineString",
                     "coordinates": [[lat, long], [lat + 10, long + 10], [lat + 12, long + 12]]
@@ -132,32 +157,45 @@
 
         }
 
-
-    </script>
-
-    <h3>Last known location</h3>
-    <div style="text-align: center">
-        {% leaflet_map "my_map" callback="map_init" %}
-        <input type = "button" id = "updateLastlocation" value = "update Last location"/>
-    </div>
-    {% block javascript %}
-        {% csrf_token %}
-        <script>
         $("#updateLastlocation").click(function(){
-            console.log(lat);
-            geojson = { "type": "Feature",
-                    "geometry": {"type": "Point", "coordinates": [lat, long]}};
+            console.log(lat,long);
+{#            geojson = { "type": "Feature",#}
+{#                    "geometry": {"type": "Point", "coordinates": [lat, long]}};#}
 
             $.ajax({
                 type:'POST',
                 url:'/ajax/updatelocation/',
-                data: geojson,
+                data: {"lat":lat, "long":long},
                 datatype:'json',
-                success: function(data){
-                    console.log('yas'+data);
+                success: function(){
+                    console.log('yas');
                 }
             });
         });
+
+        $("#getFriend").click(function(){
+            console.log('try get some friends');
+            $.ajax({
+                type:'GET',
+                url:'/ajax/listFriend/',
+                success: function(result){
+                    data = result.features;
+                    console.log(data);
+                    map_init();
+                }
+            });
+        });
+
+{#        function displayFriend(data){#}
+{#            console.log(data[1]);#}
+{#            for(var i = 0; i < data.length; i++){#}
+{#                myLatLon = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);#}
+{#                console.log(myLatLon);#}
+{#                L.marker(myLatLon).addTo(map)#}
+{#                    .bindPopup(data.properties.username)#}
+{#                    .openPopup();#}
+{#            }#}
+{#        }#}
         </script>
     {% endblock %}
     <div>

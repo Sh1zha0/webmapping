@@ -1,5 +1,12 @@
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from rest_framework import status
+
+from . import serializers
+from rest_framework.authtoken.models import Token
+from rest_framework import permissions
+from rest_framework.response import Response
 from django.core.serializers import serialize
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect, render_to_response
@@ -13,7 +20,10 @@ from django.views.generic.base import View
 from django.views.generic.edit import FormView, UpdateView, CreateView, DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 import json
+
+from rest_framework import generics
 
 from . import forms
 
@@ -140,16 +150,39 @@ class UserProfile(UpdateView):
 #
 #     return render(request, 'app/user_profile.html', {'form': form})
 
+
+# user update location with normal django view
 @login_required
 def updatelocat(request):
     if request.POST:
         user = get_user_model().objects.get(pk=request.user.pk)
-        # # user.update()
-        # user.last_location = GEOSGeometry(geo)
-        geoS = request.POST
-        # geoS = serialize('geojson', request.POST);
-        print(geoS);
-        # user.save(update_fields = ['last_location'])
+        lat = float(request.POST.get("lat", False))
+        long = float(request.POST.get("long", False))
+        user.last_location = point = Point(long, lat)
+        user.save(update_fields = ['last_location'])
         # print('1')
         return HttpResponse()
 
+
+class listV(generics.ListAPIView):
+    serializer_class = serializers.UserMeSerializer
+
+    print('hihi')
+
+    def get_queryset(self):
+        # return get_user_model().objects.all().order_by("username")
+        # serializer = serializers.UserMeSerializer(get_user_model().objects.all().order_by("username"))
+        data = get_user_model().objects.all()
+        sdata = serialize('json', list(data), fields=('username', 'id', 'last_location'))
+        return get_user_model().objects.all().order_by("username")
+
+    def get_object(self):
+        return get_user_model().objects.get(email=self.request.user.email)
+
+    def final_process(self):
+        data = get_user_model().objects.all()
+        sdata = serialize('json', list(data), fields=('username', 'id', 'last_location'))
+        print('hahaha    '+data)
+        print('seeeeeeee   '+sdata)
+
+        return Response(sdata, status=status.HTTP_200_OK)
