@@ -180,7 +180,8 @@ class listV(generics.ListAPIView):
         return get_user_model().objects.get(email=self.request.user.email)
 
     def final_process(self):
-        data = get_user_model().objects.all()
+        data = get_user_model().objects.all().exclude(pk = self.request.user.pk)
+        print(self.request.user.pk)
         sdata = serialize('json', list(data), fields=('username', 'id', 'last_location'))
         print('hahaha    '+data)
         print('seeeeeeee   '+sdata)

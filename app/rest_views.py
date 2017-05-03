@@ -106,6 +106,7 @@ def token_login(request):
             login(request, user)
             try:
                 my_token = Token.objects.get(user=user)
+                print(my_token)
                 return Response({"token": "{}".format(my_token.key)}, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({"detail": "Could not get token"})

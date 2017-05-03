@@ -70,6 +70,9 @@
 
     <script type="text/javascript" src="/static/app/js/jquery-1.8.3.min.js"></script>
     <script type="text/javascript" src="/static/app/js/ajaxHandling.js"></script>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
+   integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+   crossorigin=""></script>
     <script>
 
 
@@ -78,7 +81,8 @@
 
     <h3>Last known location</h3>
     <div style="text-align: center">
-        {% leaflet_map "my_map" callback="map_init" %}
+{#        {% leaflet_map "my_map" callback="map_init" %}#}
+        <div id = 'mapD' style = "width:500px;height:500px;"></div>
         <input type = "button" id = "updateLastlocation" value = "update Last location"/>
         <input type = "button" id = "getFriend" value = "Print Friends"/>
     </div>
@@ -86,6 +90,10 @@
         {% csrf_token %}
         <script>
         var myLatLon, lat, long, data;
+
+        var map = L.map('mapD');
+        map_init(map);
+
         function map_init(map, options) {
             //var geom = JSON.parse($("#geom").html());
 {#            var myLatLon = L.latLng([geom.coordinates[1], geom.coordinates[0]]);#}
@@ -136,15 +144,15 @@
                     .bindPopup('you are here')
                     .openPopup();
 
-                if(data != null){
-                    for(var i = 0; i < data.length; i++){
-                        myLatLon = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);
-                        console.log(painting);
-                        L.marker(myLatLon).addTo(map)
-                        .bindPopup(data.properties.username)
-                        .openPopup();
-                     }
-                }
+{#                if(data != null){#}
+{#                    for(var i = 0; i < data.length; i++){#}
+{#                        myLatLon = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);#}
+{#                        console.log(myLatLon);#}
+{#                        L.marker(myLatLon).addTo(map)#}
+{#                        .bindPopup(data.properties.username)#}
+{#                        .openPopup();#}
+{#                     }#}
+{#                }#}
 
                 var myLines = [{
                     "type": "LineString",
@@ -167,8 +175,8 @@
                 url:'/ajax/updatelocation/',
                 data: {"lat":lat, "long":long},
                 datatype:'json',
-                success: function(){
-                    console.log('yas');
+                success: function(data){
+                    console.log('yas'+data);
                 }
             });
         });
@@ -178,24 +186,23 @@
             $.ajax({
                 type:'GET',
                 url:'/ajax/listFriend/',
-                success: function(result){
-                    data = result.features;
-                    console.log(data);
-                    map_init();
+                success: function(data){
+                    displayFriend(data.features);
                 }
             });
         });
 
-{#        function displayFriend(data){#}
-{#            console.log(data[1]);#}
-{#            for(var i = 0; i < data.length; i++){#}
-{#                myLatLon = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);#}
-{#                console.log(myLatLon);#}
-{#                L.marker(myLatLon).addTo(map)#}
-{#                    .bindPopup(data.properties.username)#}
-{#                    .openPopup();#}
-{#            }#}
-{#        }#}
+        function displayFriend(data){
+            var pos;
+            console.log(data[1]);
+            for(var i = 0; i < data.length; i++){
+                pos = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);
+                console.log(data[i]);
+                L.marker(pos).addTo(map)
+                    .bindPopup(data[i].properties.username)
+                    .openPopup();
+            }
+        }
         </script>
     {% endblock %}
     <div>
