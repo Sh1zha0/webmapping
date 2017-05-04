@@ -89,9 +89,9 @@
     {% block javascript %}
         {% csrf_token %}
         <script>
-        var myLatLon, lat, long, data;
+        var myLatLon, lat, long, data, map;
 
-        var map = L.map('mapD');
+        map = L.map('mapD');
         map_init(map);
 
         function map_init(map, options) {
@@ -125,11 +125,6 @@
 
                 lat = position.coords.latitude;
                 long = position.coords.longitude;
-
-                userEmail = $("#id_email").val();
-                console.log(userEmail)
-
-                console.log(lat);
 
                 myLatLon = L.latLng(lat, long);
                 map.setView(myLatLon, 16);
@@ -176,9 +171,15 @@
                 data: {"lat":lat, "long":long},
                 datatype:'json',
                 success: function(data){
-                    console.log('yas'+data);
+                    alert('Update Successfully');
                 }
             });
+
+            map.remove(map);
+
+            map = L.map('mapD');
+            map_init(map);
+
         });
 
         $("#getFriend").click(function(){
@@ -187,6 +188,7 @@
                 type:'GET',
                 url:'/ajax/listFriend/',
                 success: function(data){
+                    console.log(data.features);
                     displayFriend(data.features);
                 }
             });

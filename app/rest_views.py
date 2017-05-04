@@ -1,5 +1,7 @@
+from app.models import FriendGroup, UserFriendGroup
 from . import models
 from . import serializers
+from django.core.serializers import serialize
 from rest_framework import permissions
 from . import permissions as my_permissions
 from wmap2017 import settings
@@ -115,7 +117,27 @@ def token_login(request):
     else:
         return Response({"detail": "Invalid User Id of Password"}, status=status.HTTP_400_BAD_REQUEST)
 
+class disFriend(generics.ListAPIView):
+    serializer_class = serializers.UserMeSerializer
 
+    def get_queryset(self):
+        # return get_user_model().objects.all().order_by("username")
+        # serializer = serializers.UserMeSerializer(get_user_model().objects.all().order_by("username"))
+        # data = get_user_model().objects.all()
+        return get_user_model().objects.all().order_by("username")
+
+    def get_object(self):
+        return get_user_model().objects.get(email=self.request.user.email)
+
+    def final_process(self):
+        #data = get_user_model().objects.exclude(pk = self.request.user.pk)
+        data2 = FriendGroup.objects.filter(owner__pk=self.request.user.pk)  # check friend group
+        data3 = UserFriendGroup.objects.filters(member__pk=data2.owner.pk)  # check friend
+
+        print(self.request.user.pk)
+        sdata = serialize('json', list(data3.member), fields=('username', 'id', 'last_location'))
+
+        return Response(sdata, status=status.HTTP_200_OK)
 # class displayFriend(generics.ListAPIView):
 #     permission_classes = (permissions.IsAuthenticated,)
 #     def get_object(self):

@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from rest_framework import status
 
+from app.models import FriendGroup, UserFriendGroup
+from . import models
 from . import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework import permissions
@@ -167,23 +169,23 @@ def updatelocat(request):
 class listV(generics.ListAPIView):
     serializer_class = serializers.UserMeSerializer
 
-    print('hihi')
-
     def get_queryset(self):
         # return get_user_model().objects.all().order_by("username")
         # serializer = serializers.UserMeSerializer(get_user_model().objects.all().order_by("username"))
-        data = get_user_model().objects.all()
-        sdata = serialize('json', list(data), fields=('username', 'id', 'last_location'))
-        return get_user_model().objects.all().order_by("username")
+        # data = get_user_model().objects.all()
+        # return get_user_model().objects.all().order_by("username")
+        return get_user_model().objects.all().exclude(pk = self.request.user.pk)
 
     def get_object(self):
         return get_user_model().objects.get(email=self.request.user.email)
 
     def final_process(self):
-        data = get_user_model().objects.all().exclude(pk = self.request.user.pk)
+        #data = get_user_model().objects.exclude(pk = self.request.user.pk)
+        data2 = FriendGroup.objects.filter(owner__pk=self.request.user.pk)#check friend group
+        data3 = UserFriendGroup.objects.filters(member__pk = data2.owner.pk)#check friend
+
+        print('hihi')
         print(self.request.user.pk)
-        sdata = serialize('json', list(data), fields=('username', 'id', 'last_location'))
-        print('hahaha    '+data)
-        print('seeeeeeee   '+sdata)
+        sdata = serialize('json', list(data3.member), fields=('username', 'id', 'last_location'))
 
         return Response(sdata, status=status.HTTP_200_OK)
