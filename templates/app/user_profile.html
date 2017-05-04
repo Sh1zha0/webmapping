@@ -196,12 +196,13 @@
 
         function displayFriend(data){
             var pos;
+            var time;
             console.log(data[1]);
             for(var i = 0; i < data.length; i++){
                 pos = L.latLng(data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]);
-                console.log(data[i]);
+                time = new Date(data[i].properties.last_login)
                 L.marker(pos).addTo(map)
-                    .bindPopup(data[i].properties.username)
+                    .bindPopup(data[i].properties.username+'\nLast login:'+time)
                     .openPopup();
             }
         }

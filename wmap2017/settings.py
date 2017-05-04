@@ -89,7 +89,8 @@ DATABASES = {
         'NAME': 'webm',
         'USER': 'postgres',
         'PASSWORD': '1996310',
-        'HOST': '172.17.0.2',
+        # 'HOST': '46.101.5.171', for local host use
+        'HOST': '172.17.0.2', #access from docker
         'PORT': '5432',
     }
 }

@@ -186,6 +186,6 @@ class listV(generics.ListAPIView):
 
         print('hihi')
         print(self.request.user.pk)
-        sdata = serialize('json', list(data3.member), fields=('username', 'id', 'last_location'))
+        sdata = serialize('json', list(data3.member), fields=('username', 'id', 'last_location','last_login'))
 
         return Response(sdata, status=status.HTTP_200_OK)
